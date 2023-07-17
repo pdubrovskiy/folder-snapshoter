@@ -50,9 +50,7 @@ pub fn cd(path: &mut PathBuf) {
             path.pop();
             println!("Sorry but your path isn't correct");
         }
-
     } else {
-
         if input.exists() {
             path.clear();
             input.iter().for_each(|e| path.push(e));
@@ -72,6 +70,6 @@ pub fn ls(path: &Path) {
     }
 }
 
-pub fn pwd(path: &PathBuf){
+pub fn pwd(path: &PathBuf) {
     println!("Current path: \n{:?}", path);
 }

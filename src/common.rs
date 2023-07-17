@@ -16,7 +16,7 @@ pub fn get_input() -> i32 {
     }
 }
 
-pub fn get_initial_path(str: &str) -> PathBuf{
+pub fn get_initial_path(str: &str) -> PathBuf {
     let mut path = PathBuf::from(str);
     path.pop();
     path
