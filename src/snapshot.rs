@@ -44,38 +44,6 @@ impl Snapshot {
     }
 }
 
-// pub fn fill(path: &Path, files: &mut Vec<File>, dirs: &mut Vec<Directory>) {
-//     for item in path.read_dir().expect("Reading dir was failed") {
-//         if let Ok(item) = item {
-//             let item_name = String::from(
-//                 item.path()
-//                     .file_name()
-//                     .expect("File Error")
-//                     .to_str()
-//                     .expect("File name Error"),
-//             );
-
-//             if item.path().is_file() {
-//                 let file = File {
-//                     name: item_name.clone(),
-//                     size: get_size(&item.path()),
-//                 };
-//                 files.push(file);
-//             } else {
-//                 let dir = Directory {
-//                     name: item_name.clone(),
-//                     size: get_size(&item.path()),
-//                     files: Vec::new(),
-//                     dirs: Vec::new(),
-//                 };
-//                 let mut new_path = PathBuf::from(path);
-//                 new_path.push(&item_name);
-//                 fill(&new_path, files, dirs);
-//                 dirs.push(dir);
-//             }
-//         }
-//     }
-// }
 pub fn fill_and_return_size(path: &Path, files: &mut Vec<File>, dirs: &mut Vec<Directory>) -> u64 {
     for item in path.read_dir().expect("Reading dir was failed") {
         if let Ok(item) = item {
