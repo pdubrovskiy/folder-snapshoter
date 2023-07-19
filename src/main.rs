@@ -2,9 +2,9 @@ use std::env;
 
 mod commands;
 mod common;
-mod user_interface;
 mod db;
 mod snapshot;
+mod user_interface;
 
 #[tokio::main]
 async fn main() -> mongodb::error::Result<()> {

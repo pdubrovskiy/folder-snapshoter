@@ -21,9 +21,7 @@ pub struct Directory {
     dirs: Vec<Directory>,
 }
 
-impl Directory {
-    
-}
+impl Directory {}
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct File {
@@ -41,7 +39,7 @@ impl Snapshot {
             dirs: Vec::new(),
         }
     }
-    pub fn set_size(&mut self, size: u64){
+    pub fn set_size(&mut self, size: u64) {
         self.size = size;
     }
 }
@@ -78,38 +76,37 @@ impl Snapshot {
 //         }
 //     }
 // }
-pub fn fill_and_return_size(path: &Path, files: &mut Vec<File>, dirs: &mut Vec<Directory>) -> u64{
-        for item in path.read_dir().expect("Reading dir was failed") {
-            if let Ok(item) = item {
-                let item_name = String::from(
-                    item.path()
-                        .file_name()
-                        .expect("File Error")
-                        .to_str()
-                        .expect("File name Error"),
-                );
-    
-                if item.path().is_file() {
-                    let file = File {
-                        name: item_name.clone(),
-                        size: get_size(&item.path()),
-                    };
-                    files.push(file);
-                } else {
-                    let mut dir = Directory {
-                        name: item_name.clone(),
-                        size: 0,
-                        files: Vec::new(),
-                        dirs: Vec::new(),
-                    };
-                    let mut new_path = PathBuf::from(path);
-                    new_path.push(&item_name);
-                    dir.size = fill_and_return_size(&new_path, files, dirs);
-                    dirs.push(dir);
-                }
+pub fn fill_and_return_size(path: &Path, files: &mut Vec<File>, dirs: &mut Vec<Directory>) -> u64 {
+    for item in path.read_dir().expect("Reading dir was failed") {
+        if let Ok(item) = item {
+            let item_name = String::from(
+                item.path()
+                    .file_name()
+                    .expect("File Error")
+                    .to_str()
+                    .expect("File name Error"),
+            );
+
+            if item.path().is_file() {
+                let file = File {
+                    name: item_name.clone(),
+                    size: get_size(&item.path()),
+                };
+                files.push(file);
+            } else {
+                let mut dir = Directory {
+                    name: item_name.clone(),
+                    size: 0,
+                    files: Vec::new(),
+                    dirs: Vec::new(),
+                };
+                let mut new_path = PathBuf::from(path);
+                new_path.push(&item_name);
+                dir.size = fill_and_return_size(&new_path, files, dirs);
+                dirs.push(dir);
             }
         }
+    }
 
-        files.iter().fold(0,|s, e| s + e.size) + dirs.iter().fold(0, |s, e| s + e.size)
-
+    files.iter().fold(0, |s, e| s + e.size) + dirs.iter().fold(0, |s, e| s + e.size)
 }
