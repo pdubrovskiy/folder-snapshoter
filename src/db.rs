@@ -1,15 +1,14 @@
+use std::env;
+
 use mongodb::{
     bson::doc,
     options::{ClientOptions, ServerApi, ServerApiVersion},
     Client, Database,
 };
 
-const DB_NAME: &str = "snapshots_gallery";
-const DB_URI: &str =
-    "mongodb+srv://user:user@cluster0.ycjzrmp.mongodb.net/?retryWrites=true&w=majority";
-
 pub async fn connect_db() -> mongodb::error::Result<Database> {
-    let mut client_options = ClientOptions::parse(DB_URI).await?;
+    let mut client_options =
+        ClientOptions::parse(env::var("DB_URI").expect("DB_URI must be set")).await?;
 
     let server_api = ServerApi::builder().version(ServerApiVersion::V1).build();
     client_options.server_api = Some(server_api);
@@ -21,7 +20,7 @@ pub async fn connect_db() -> mongodb::error::Result<Database> {
         .run_command(doc! {"ping": 1}, None)
         .await?;
 
-    let db = client.database(DB_NAME);
+    let db = client.database(&env::var("DB_NAME").expect("DB_NAME must be set"));
 
     Ok(db)
 }
