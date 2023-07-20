@@ -1,3 +1,4 @@
+use dotenv::dotenv;
 use std::env;
 
 mod commands;
@@ -8,6 +9,8 @@ mod user_interface;
 
 #[tokio::main]
 async fn main() -> mongodb::error::Result<()> {
+    dotenv().ok();
+
     let args: Vec<String> = env::args().collect();
     let mut path = common::get_initial_path(&args[0]);
 
@@ -17,6 +20,6 @@ async fn main() -> mongodb::error::Result<()> {
 
     loop {
         user_interface::print_menu();
-        commands::run_command(common::get_input(), &mut path, &db).await;
+        commands::run_command(common::get_input(), &mut path, &db).await?;
     }
 }
