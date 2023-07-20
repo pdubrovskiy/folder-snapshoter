@@ -6,7 +6,9 @@ use mongodb::{
     Client, Database,
 };
 
-pub async fn connect_db() -> mongodb::error::Result<Database> {
+use mongodb::error::Error;
+
+pub async fn connect_db() -> Result<Database, Error> {
     let mut client_options =
         ClientOptions::parse(env::var("DB_URI").expect("DB_URI must be set")).await?;
 

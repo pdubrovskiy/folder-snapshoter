@@ -2,6 +2,8 @@ use std::path::PathBuf;
 
 use mongodb::Database;
 
+use crate::errors::ServiceError;
+
 mod exit;
 mod navigation;
 mod snapshot_creation;
@@ -10,7 +12,7 @@ pub async fn run_command(
     input: i32,
     path: &mut PathBuf,
     db: &Database,
-) -> mongodb::error::Result<()> {
+) -> Result<(), ServiceError> {
     match input {
         1 => {
             navigation::nav_menu(path);
