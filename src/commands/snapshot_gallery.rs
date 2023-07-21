@@ -3,7 +3,7 @@ use std::path::PathBuf;
 
 use crate::common;
 use crate::errors::ServiceError;
-use crate::snapshot::Snapshot;
+use crate::snapshot::{self, Snapshot};
 use mongodb::bson::doc;
 use mongodb::Collection;
 use mongodb::Database;
@@ -24,8 +24,19 @@ pub async fn snapshot_gallery_menu(path: &PathBuf, db: &Database) -> Result<(), 
                 show_list_of_versions(path, &collection).await?;
             }
             2 => {
-                let version = common::get_input();
-               show_version(path, &collection, version).await?;
+                println!("Please, input the number of version or 0 to choose the last one:");
+                let mut version = common::get_input();
+
+                if version == 0 {
+                    version = snapshot::get_version(&collection, path).await?;
+
+                    if version == 0 {
+                        println!("Versions not found");
+                        break;
+                    }
+                }
+
+                show_version(path, &collection, version).await?;
             }
             _ => break,
         }
@@ -39,8 +50,8 @@ pub async fn show_list_of_versions(
 ) -> Result<(), ServiceError> {
     let mut cursor = match collection.find(doc! {"path": path}, None).await {
         Ok(cursor) => cursor,
-        Err(_) => return Err(ServiceError::FailedToFoundCollection)
-    }; 
+        Err(_) => return Err(ServiceError::FailedToFoundCollection),
+    };
 
     while cursor.advance().await.unwrap() {
         println!(
@@ -62,18 +73,19 @@ pub async fn show_version(
     path: &str,
     collection: &Collection<Snapshot>,
     version: i32,
-) -> Result<(), ServiceError>{
-
-    let found_item = match collection.find_one(doc! {"path": path, "version": version}, None).await {
+) -> Result<(), ServiceError> {
+    let found_item = match collection
+        .find_one(doc! {"path": path, "version": version}, None)
+        .await
+    {
         Ok(item) => item,
-        Err(_) => return Err(ServiceError::FailedToFoundCollection)
+        Err(_) => return Err(ServiceError::FailedToFoundCollection),
     };
-    
+
     match found_item {
-            Some(snapshot) => println!("{:#?}", snapshot),
-            None => println!("Snapshot isn't found. Check the version")
+        Some(snapshot) => println!("{:#?}", snapshot),
+        None => println!("Snapshot isn't found. Check the version"),
     }
 
     Ok(())
 }
-
