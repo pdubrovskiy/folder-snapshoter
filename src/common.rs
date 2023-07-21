@@ -1,4 +1,6 @@
-use std::{io, path::PathBuf};
+use std::fs::File;
+use std::io;
+use std::path::{Path, PathBuf};
 
 pub fn get_input() -> i32 {
     loop {
@@ -20,4 +22,11 @@ pub fn get_initial_path(str: &str) -> PathBuf {
     let mut path = PathBuf::from(str);
     path.pop();
     path
+}
+
+pub fn get_size(path: &Path) -> u64 {
+    let f = File::open(path).expect("File Error");
+    let size = f.metadata().unwrap().len();
+
+    size
 }
