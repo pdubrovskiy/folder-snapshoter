@@ -1,8 +1,10 @@
 use std::path::{Path, PathBuf};
 
+use mongodb::Collection;
+use mongodb::bson::doc;
 use serde::{Deserialize, Serialize};
 
-use crate::common::get_size;
+use crate::{common::get_size, errors::ServiceError};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Snapshot {
@@ -80,4 +82,20 @@ pub fn fill_and_return_size(path: &Path, files: &mut Vec<File>, dirs: &mut Vec<D
     }
 
     (files.iter().fold(0, |s, e| s + e.size_kb) + dirs.iter().fold(0, |s, e| s + e.size_kb)) / 1024
+}
+
+pub async fn get_version(
+    collection: &Collection<Snapshot>,
+    path: &str,
+) -> Result<i32, ServiceError> {
+    let mut cursor = match collection.find(doc! {"path": path}, None).await {
+        Ok(cursor) => cursor,
+        Err(_) => return Err(ServiceError::FailedToFoundCollection)
+    };
+    let mut version = 0;
+
+    while cursor.advance().await.unwrap() {
+        version += 1
+    }
+    Ok(version)
 }

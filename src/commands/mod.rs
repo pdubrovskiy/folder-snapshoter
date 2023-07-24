@@ -7,6 +7,7 @@ use crate::errors::ServiceError;
 mod exit;
 mod navigation;
 mod snapshot_creation;
+mod snapshot_gallery;
 
 pub async fn run_command(
     input: i32,
@@ -19,6 +20,9 @@ pub async fn run_command(
         }
         2 => {
             snapshot_creation::create_snapshot(path, db).await?;
+        }
+        3 => {
+            snapshot_gallery::snapshot_gallery_menu(path, db).await?;
         }
         5 => {
             exit::exit();

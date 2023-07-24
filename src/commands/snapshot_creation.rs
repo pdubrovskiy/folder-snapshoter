@@ -5,7 +5,6 @@ use crate::errors::ServiceError;
 use crate::snapshot::{self, Snapshot};
 
 use chrono::Local;
-use mongodb::bson::doc;
 use mongodb::Collection;
 use mongodb::Database;
 
@@ -14,9 +13,9 @@ pub async fn create_snapshot(path: &Path, db: &Database) -> Result<(), ServiceEr
     let snapshot_path = String::from(path.to_str().unwrap());
     let collection: Collection<Snapshot> = db.collection(&collection_name);
 
-    let version = get_version(&collection, &snapshot_path)
+    let version = snapshot::get_version(&collection, &snapshot_path)
         .await
-        .expect("Version Error");
+        .expect("Version Error")  + 1;
     let date = Local::now().to_string();
 
     let mut snapshot = snapshot::Snapshot::create(version, date, snapshot_path);
@@ -32,20 +31,4 @@ pub async fn create_snapshot(path: &Path, db: &Database) -> Result<(), ServiceEr
         };
 
     Ok(())
-}
-
-pub async fn get_version(
-    collection: &Collection<Snapshot>,
-    path: &str,
-) -> Result<i32, ServiceError> {
-    let mut cursor = match collection.find(doc! {"path": path}, None).await {
-        Ok(cursor) => cursor,
-        Err(_) => return Err(ServiceError::FailedToFoundCollection)
-    };
-    let mut version = 0;
-
-    while cursor.advance().await.unwrap() {
-        version += 1
-    }
-    Ok(version + 1)
 }
