@@ -24,7 +24,7 @@ pub async fn run_command(
         3 => {
             snapshot_gallery::snapshot_gallery_menu(path, db).await?;
         }
-        5 => {
+        4 => {
             exit::exit();
         }
         _ => {

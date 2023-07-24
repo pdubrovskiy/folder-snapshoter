@@ -17,6 +17,7 @@ pub async fn snapshot_gallery_menu(path: &PathBuf, db: &Database) -> Result<(), 
         println!("|____SNAPSHOT_GALLERY____|");
         println!("1. Show list of versions");
         println!("2. Show the version");
+        println!("3. Compare snapshots");
         println!("ENTER ANOTHER NUMBER TO EXIT FROM SNAPSHOT GALLERY!");
 
         match common::get_input() {
@@ -35,8 +36,10 @@ pub async fn snapshot_gallery_menu(path: &PathBuf, db: &Database) -> Result<(), 
                         break;
                     }
                 }
-
                 show_version(path, &collection, version).await?;
+            }
+            3 => {
+
             }
             _ => break,
         }
