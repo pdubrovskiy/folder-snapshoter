@@ -15,7 +15,8 @@ pub async fn create_snapshot(path: &Path, db: &Database) -> Result<(), ServiceEr
 
     let version = snapshot::get_version(&collection, &snapshot_path)
         .await
-        .expect("Version Error")  + 1;
+        .expect("Version Error")
+        + 1;
     let date = Local::now().to_string();
 
     let mut snapshot = snapshot::Snapshot::create(version, date, snapshot_path);
@@ -23,12 +24,14 @@ pub async fn create_snapshot(path: &Path, db: &Database) -> Result<(), ServiceEr
     let size = snapshot::fill_and_return_size(path, &mut snapshot.files, &mut snapshot.dirs);
     snapshot.set_size(size);
 
-    match db.collection(&env::var("COLL_NAME").expect("COLL_NAME must be set"))
+    match db
+        .collection(&env::var("COLL_NAME").expect("COLL_NAME must be set"))
         .insert_one(snapshot, None)
-        .await {
-            Ok(res) => res,
-            Err(_) => return Err(ServiceError::FailedToFoundCollection)
-        };
+        .await
+    {
+        Ok(res) => res,
+        Err(_) => return Err(ServiceError::FailedToFoundCollection),
+    };
 
     Ok(())
 }

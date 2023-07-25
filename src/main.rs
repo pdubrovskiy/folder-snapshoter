@@ -5,9 +5,9 @@ use std::env;
 mod commands;
 mod common;
 mod db;
+mod errors;
 mod snapshot;
 mod user_interface;
-mod errors;
 
 #[tokio::main]
 async fn main() -> Result<(), ServiceError> {
@@ -18,8 +18,8 @@ async fn main() -> Result<(), ServiceError> {
 
     let db = match db::connect_db().await {
         Ok(db) => db,
-        Err(_) => return Err(ServiceError::FailedToCreateDB)
-    }; 
+        Err(_) => return Err(ServiceError::FailedToCreateDB),
+    };
 
     user_interface::greeting();
 
@@ -27,5 +27,4 @@ async fn main() -> Result<(), ServiceError> {
         user_interface::print_menu();
         commands::run_command(common::get_input(), &mut path, &db).await?;
     }
-
 }

@@ -6,7 +6,7 @@ pub enum ServiceError {
     FailedToFoundCollection,
     FailedToParseCommand,
     WrongNumberOfArgs,
-    InvalidArgument
+    InvalidArgument,
 }
 impl fmt::Display for ServiceError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

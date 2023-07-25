@@ -3,7 +3,6 @@ use std::path::PathBuf;
 use crate::snapshot::{Comparison, Info};
 
 pub fn compare_snapshots<T: Comparison>(snap_1: &T, snap_2: &T, path: &mut PathBuf) {
-
     compare_size(snap_1.get_size(), snap_2.get_size(), "snapshot");
 
     for file in snap_1.get_files() {
@@ -12,7 +11,11 @@ pub fn compare_snapshots<T: Comparison>(snap_1: &T, snap_2: &T, path: &mut PathB
             let new_file = &snap_2.get_files()[index as usize];
             compare_size(file.size_kb, new_file.size_kb, &file.name);
         } else {
-            println!("File \"{}/{}\" was deleted", path.to_str().unwrap().trim(), file.name);
+            println!(
+                "File \"{}/{}\" was deleted",
+                path.to_str().unwrap().trim(),
+                file.name
+            );
         }
     }
 
@@ -24,7 +27,11 @@ pub fn compare_snapshots<T: Comparison>(snap_1: &T, snap_2: &T, path: &mut PathB
             path.push(dir.get_name());
             compare_snapshots(dir, new_dir, path);
         } else {
-            println!("Directory \"{}/{}\" was deleted", path.to_str().unwrap().trim(), dir.name);
+            println!(
+                "Directory \"{}/{}\" was deleted",
+                path.to_str().unwrap().trim(),
+                dir.name
+            );
         }
     }
 }

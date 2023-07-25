@@ -1,7 +1,7 @@
 use std::path::{Path, PathBuf};
 
-use mongodb::Collection;
 use mongodb::bson::doc;
+use mongodb::Collection;
 use serde::{Deserialize, Serialize};
 
 use crate::{common::get_size, errors::ServiceError};
@@ -62,23 +62,21 @@ impl Comparison for Directory {
     }
 }
 
-
 pub trait Info {
     fn get_name(&self) -> &str;
 }
 
 impl Info for Directory {
-    fn get_name(&self) -> &str{
+    fn get_name(&self) -> &str {
         &self.name
     }
 }
 
 impl Info for File {
-    fn get_name(&self) -> &str{
+    fn get_name(&self) -> &str {
         &self.name
     }
 }
-
 
 impl Snapshot {
     pub fn create(version: i32, date: String, path: String) -> Snapshot {
@@ -139,7 +137,7 @@ pub async fn get_version(
 ) -> Result<i32, ServiceError> {
     let mut cursor = match collection.find(doc! {"path": path}, None).await {
         Ok(cursor) => cursor,
-        Err(_) => return Err(ServiceError::FailedToFoundCollection)
+        Err(_) => return Err(ServiceError::FailedToFoundCollection),
     };
     let mut version = 0;
 
