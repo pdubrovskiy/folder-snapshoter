@@ -32,10 +32,10 @@ pub async fn snapshot_gallery_menu(path: &PathBuf, db: &Database) -> Result<(), 
                 show_version(path, &collection, version).await?;
             }
             3 => {
-                println!("Please input the version of snapshot to compare or 0 - to choose the last one: ");
+                println!("Please input the first version of snapshot to compare or 0 - to choose the last one: ");
                 let version_1 = common::get_input();
 
-                println!("Please input the version of snapshot to compare or 0 - to choose the last one: ");
+                println!("Please input the second version of snapshot to compare or 0 - to choose the last one: ");
                 let version_2 = common::get_input();
 
                 let last_version = snapshot::get_version(&collection, path).await?;
