@@ -35,3 +35,54 @@ pub async fn create_snapshot(path: &Path, db: &Database) -> Result<(), ServiceEr
 
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use std::fs;
+    use std::{env, path::PathBuf};
+
+    use mongodb::Collection;
+
+    use crate::commands::snapshot_gallery::get_snapshot;
+    use crate::db;
+    use crate::snapshot::Snapshot;
+
+    use crate::commands::snapshot_creation::create_snapshot;
+
+    fn set_env_variables() {
+        env::set_var("DB_NAME", "snapshots_gallery");
+        env::set_var(
+            "DB_URI",
+            "mongodb+srv://user:user@cluster0.ycjzrmp.mongodb.net/?retryWrites=true&w=majority",
+        );
+        env::set_var("COLL_NAME", "snapshots");
+    }
+    #[tokio::test]
+    async fn test_create_snapshot() {
+        set_env_variables();
+
+        let args: Vec<String> = env::args().collect();
+        let mut path = PathBuf::from(&args[0]);
+        path.pop();
+        path.push("test_dir");
+
+        fs::create_dir(&path).unwrap();
+
+        let db = db::connect_db().await.unwrap();
+        let collection_name = &env::var("COLL_NAME").expect("COLL_NAME must be set");
+        let collection: Collection<Snapshot> = db.collection(&collection_name);
+        let version = 1;
+
+        create_snapshot(&path, &db).await.unwrap();
+
+        fs::remove_dir_all(&path).unwrap();
+
+        match get_snapshot(&path.to_str().unwrap(), &collection, version)
+            .await
+            .unwrap()
+        {
+            Some(_) => true,
+            None => false,
+        };
+    }
+}

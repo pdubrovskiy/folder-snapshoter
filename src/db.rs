@@ -26,3 +26,29 @@ pub async fn connect_db() -> Result<Database, Error> {
 
     Ok(db)
 }
+
+#[cfg(test)]
+mod tests {
+
+    use crate::db::connect_db;
+    use std::env;
+
+    fn set_env_variables() {
+        env::set_var("DB_NAME", "snapshots_gallery");
+        env::set_var(
+            "DB_URI",
+            "mongodb+srv://user:user@cluster0.ycjzrmp.mongodb.net/?retryWrites=true&w=majority",
+        );
+    }
+
+    #[tokio::test]
+    async fn test_connect_db() {
+        set_env_variables();
+        let result = match connect_db().await {
+            Ok(_) => true,
+            Err(_) => false,
+        };
+
+        assert_eq!(result, true);
+    }
+}
