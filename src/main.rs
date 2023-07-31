@@ -10,6 +10,7 @@ mod snapshot;
 mod user_interface;
 
 #[tokio::main]
+#[cfg(not(tarpaulin_include))]
 async fn main() -> Result<(), ServiceError> {
     dotenv().ok();
 

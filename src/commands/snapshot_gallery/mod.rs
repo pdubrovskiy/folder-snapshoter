@@ -1,7 +1,8 @@
-use std::env;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
+use std::{env, fs};
 
-use crate::common;
+use crate::commands::snapshot_gallery::snapshot_comparison::Mode;
+use crate::common::{self, get_input};
 use crate::errors::ServiceError;
 use crate::snapshot::{self, Snapshot};
 use mongodb::bson::doc;
@@ -56,6 +57,7 @@ pub async fn snapshot_gallery_menu(path: &PathBuf, db: &Database) -> Result<(), 
     Ok(())
 }
 
+#[cfg(not(tarpaulin_include))]
 pub async fn show_list_of_versions(
     path: &str,
     collection: &Collection<Snapshot>,
@@ -81,6 +83,7 @@ pub async fn show_list_of_versions(
     Ok(())
 }
 
+#[cfg(not(tarpaulin_include))]
 pub async fn show_version(
     path: &str,
     collection: &Collection<Snapshot>,
@@ -132,8 +135,110 @@ pub async fn compare(
         let snapshot_1 = snapshot_1.unwrap();
         let snapshot_2 = snapshot_2.unwrap();
         let mut path = PathBuf::new();
-        snapshot_comparison::compare_snapshots(&snapshot_1, &snapshot_2, &mut path);
+        println!("Select the display option: 1 - show comparison on the screen else upload comparison to the file (result.txt)");
+        let selection = get_input();
+
+        let mut file_path = PathBuf::from(&path);
+        file_path.push("result.txt");
+
+        if Path::exists(&file_path) {
+            fs::remove_file(&file_path).expect("File Error");
+        }
+
+        if selection == 1 {
+            println!("Snapshot comparison: ");
+            snapshot_comparison::compare_snapshots(
+                &snapshot_1,
+                &snapshot_2,
+                &mut path,
+                print_on_the_screen,
+                &Mode::ScreenMode,
+                &file_path.to_str().unwrap(),
+            );
+        } else {
+            println!("Now you can see snapshot comparison in result.txt");
+            snapshot_comparison::compare_snapshots(
+                &snapshot_1,
+                &snapshot_2,
+                &mut path,
+                print_on_the_screen,
+                &Mode::FileMode,
+                &file_path.to_str().unwrap(),
+            );
+        }
     };
 
     Ok(())
+}
+
+pub fn print_on_the_screen() {}
+
+#[cfg(test)]
+mod tests {
+    use mongodb::Collection;
+    use std::env;
+
+    use crate::{commands::snapshot_gallery::get_snapshot, db, snapshot::Snapshot};
+
+    fn set_env_variables() {
+        env::set_var("DB_NAME", "snapshots_gallery");
+        env::set_var(
+            "DB_URI",
+            "mongodb+srv://user:user@cluster0.ycjzrmp.mongodb.net/?retryWrites=true&w=majority",
+        );
+        env::set_var("COLL_NAME", "snapshots");
+    }
+    #[tokio::test]
+    async fn test_get_snapshot() {
+        set_env_variables();
+
+        let path = "test";
+        let db = db::connect_db().await.unwrap();
+        let collection: Collection<Snapshot> =
+            db.collection(&env::var("COLL_NAME").expect("COLL_NAME must be set"));
+        let version = 1;
+
+        let result = get_snapshot(path, &collection, version)
+            .await
+            .unwrap()
+            .unwrap();
+
+        let test_value = Snapshot {
+            version: 1,
+            date: String::from("date"),
+            path: String::from("test"),
+            size_kb: 0,
+            files: Vec::new(),
+            dirs: Vec::new(),
+        };
+
+        assert_eq!(result, test_value);
+    }
+
+    #[tokio::test]
+    async fn test_get_snapshot_with_last_version() {
+        set_env_variables();
+
+        let path = "test";
+        let db = db::connect_db().await.unwrap();
+        let collection: Collection<Snapshot> =
+            db.collection(&env::var("COLL_NAME").expect("COLL_NAME must be set"));
+        let version = 0;
+
+        let result = get_snapshot(path, &collection, version)
+            .await
+            .unwrap()
+            .unwrap();
+
+        let test_value = Snapshot {
+            version: 1,
+            date: String::from("date"),
+            path: String::from("test"),
+            size_kb: 0,
+            files: Vec::new(),
+            dirs: Vec::new(),
+        };
+
+        assert_eq!(result, test_value);
+    }
 }

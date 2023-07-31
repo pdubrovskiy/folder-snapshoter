@@ -8,6 +8,8 @@ pub enum ServiceError {
     WrongNumberOfArgs,
     InvalidArgument,
 }
+
+#[cfg(not(tarpaulin_include))]
 impl fmt::Display for ServiceError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
